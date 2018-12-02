@@ -36,12 +36,36 @@ namespace DatingApp.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials() );
+            });
+            // services.AddCors(options =>
+            // {
+            //     options.AddPolicy("CorsPolicy",
+            //         builder => builder
+            //         .WithOrigins("http://127.0.0.1:4200")
+            //         .AllowAnyMethod()
+            //         .AllowAnyHeader()
+            //         .AllowCredentials() );
+            // });
+
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(opt => {
                     opt.SerializerSettings.ReferenceLoopHandling =
                         Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
-            services.AddCors();
+
+            
+            // services.AddCors();
+            
+
             services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
             services.AddAutoMapper();
             services.AddTransient<Seed>();
@@ -87,7 +111,9 @@ namespace DatingApp.API
 
             // app.UseHttpsRedirection();
             // seeder.SeedUsers();
-            app.UseCors(X => X.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            // app.UseCors(X => X.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseMvc();
         }
